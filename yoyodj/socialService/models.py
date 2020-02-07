@@ -191,7 +191,8 @@ class Posts(models.Model):
     updated_dt = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
-        return f'Post (PK: {self.pk}, Author: {self.users_idx})'
+        return f'Post (idx: {self.pk}, Author: {self.users_idx}, Description: {self.contents}, ' \
+               f'uploadedAt: {self.created_dt}, tags: {self.tags})'
 
     class Meta:
         managed = False

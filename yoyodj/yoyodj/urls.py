@@ -14,11 +14,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from yoyodj.socialService import views
+from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('/upload/<int:id>', views.add_post, name='post-upload'),
-    path('/comment/<int:id>', views.add_comment, name='post-comment')
+    path('', include('socialService.urls')),
 ]
