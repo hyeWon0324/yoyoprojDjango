@@ -192,7 +192,7 @@ class Posts(models.Model):
 
     def __str__(self):
         return f'Post (idx: {self.pk}, Author: {self.users_idx}, Description: {self.contents}, ' \
-               f'uploadedAt: {self.created_dt}, tags: {self.tags})'
+               f'uploadedAt: {self.created_dt},track_idx:{self.track_idx} tags: {self.tags})'
 
     class Meta:
         managed = False

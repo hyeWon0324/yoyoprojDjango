@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 
 class TrackPost:
+    '''
     # track info
     title = ''
     track_type = 0
@@ -19,15 +20,34 @@ class TrackPost:
     # post info
     tags = []        # additional tags by author
     desc = ''
+    comment_count = 0
+    likes_count = 0
+    created_dt = ''
+    updated_dt = ''
 
     # user info
     author_name = ''
     follower_count = 0
     track_count = 0
+     def __init__(self, title, track_type, played_count,
+                 moods, genre, track_source, image,
+                 tags, contents, comment_count, likes_count,
+                 author_name, follower_count, created_dt, updated_dt):
 
-    def __init__(self, title, track_type, played_count, moods, follower, contents):
-        self.follower_count = follower
+        self.follower_count = follower_count
         self.desc = contents
+     '''
+    track = Tracks()
+    user = Users()
+    post = Posts()
+
+    def __init__(self, track, user, post):
+        self.track = track
+        self.user = user
+        self.post = post
+
+    def setForSummarizedTrack(self, comment_count):
+        self.comment_count = comment_count
 
 
 def list_posts(request):
@@ -36,16 +56,28 @@ def list_posts(request):
         qs = qs.filter(created_dt__lte=datetime.now())
         posts = qs.order_by('-created_dt')
         #posts = qs.order_by('-id')
-        tracks = []
+        track_posts = []
         for post in posts:
-            tracks.append(Tracks.objects.get(idx=post.track_idx))
-        track_posts = TrackPost()
+            '''
+            track = post.track_idx
+            track_post = TrackPost(title=track.title, track_type=track.type_idx,
+                                   played_count=track.played_count, moods=track.moods, genre=track.genre_idx,
+                                   track_source=track.track_source, image=track.image,
+                                   tags=post.tags, contents=post.contents, comment_count=post.comments_count,
+                                   likes_count=post.likes_count, follower_count=post.follower_count,
+                                   created_dt=post.created_dt, updated_dt=post.updated_dt)
+            '''
+            track_post = TrackPost(track=post.track_idx, post=post, user=post.users_idx)
+            track_posts.append(track_post)
+
         return render(request, 'socialService/list_posts.html',
                   {'track_posts': track_posts})
     except ObjectDoesNotExist:
         print("Either the entry or track doesn't exist.")
 
 # Create your views here.
+
+
 '''
 # @login_required(login_url = "user:login")
 
