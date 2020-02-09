@@ -1,18 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>YOYO</title>
-</head>
-<body>
-    <h1> <a href=""> Hey! YOYO </a></h1>
+{% extends "socialService/base.html" %}
+{% block contents %}
     {% for post in track_posts %}
-        <div>
-            <p>uploaded: {{ post.created_dt }} </p>
-            <p>{{ post.contents|linebreaks }}</p>
-            <br>
-        </div>
-         {{ post_list }}
+                <div class="post">
+                    <div class="date">
+                        uploaded: {{ post.created_dt }}
+                    </div>
+                     <h1><a href="">{{ post.title }}</a></h1>
+                    <p>likes: {{ post.likes_count }}</p>
+                    <p>{{ post.contents|linebreaks }}</p>
+
+                </div>
     {% endfor %}
-</body>
-</html>
+
+{% endblock %}
