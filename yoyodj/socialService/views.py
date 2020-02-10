@@ -2,52 +2,11 @@ from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect, get_object_or_404, reverse
 from .models import Posts, Comments, Tracks, Users
+from .social_models import TrackPost
+from .forms import PostForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
-
-class TrackPost:
-    '''
-    # track info
-    title = ''
-    track_type = 0
-    played_count = 0
-    moods = ''       # mood tags if MR
-    genre = ''       # genre if song
-    track_source =''
-    image = ''
-
-    # post info
-    tags = []        # additional tags by author
-    desc = ''
-    comment_count = 0
-    likes_count = 0
-    created_dt = ''
-    updated_dt = ''
-
-    # user info
-    author_name = ''
-    follower_count = 0
-    track_count = 0
-     def __init__(self, title, track_type, played_count,
-                 moods, genre, track_source, image,
-                 tags, contents, comment_count, likes_count,
-                 author_name, follower_count, created_dt, updated_dt):
-
-        self.follower_count = follower_count
-        self.desc = contents
-     '''
-    track = Tracks()
-    user = Users()
-    post = Posts()
-
-    def __init__(self, track, user, post):
-        self.track = track
-        self.user = user
-        self.post = post
-
-    def setForSummarizedTrack(self, comment_count):
-        self.comment_count = comment_count
 
 
 def list_posts(request):
@@ -75,9 +34,28 @@ def list_posts(request):
     except ObjectDoesNotExist:
         print("Either the entry or track doesn't exist.")
 
-# Create your views here.
 
+def post_detail(request, pk):
+    post = get_object_or_404(Posts, pk=pk)
+    track_post = TrackPost(track=post.track_idx, post=post, user=post.users_idx)
+    #post = Posts.objects.get(idx=pk)
+    return render(request, 'socialService/post_detail.html', {'post': track_post})
 
+def post_new(request):
+    # request.POST, request.FILES
+
+    if request.method == "POST":
+        form = PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            #post.users_idx = request.user
+            post.post.created_dt = datetime.utcnow()
+            post.save()
+
+        return redirect('post_detail', pk=post.post.pk)
+    else:
+        form = PostForm()
+    return render(request, 'socialService/post_edit.html', {'form': form})
 '''
 # @login_required(login_url = "user:login")
 
