@@ -47,6 +47,7 @@ class TrackPost:
     def setHashTagList(self):
         if(self.post.tags):
             taglist = self.post.tags.split(' ')
+            self.hashtags = []                  # initiate
             for tag in taglist:
                 self.hashtags.append("#"+tag)
 

@@ -18,6 +18,11 @@
                         </a>
                         {{ post.post.likes_count }}
 
+                        <!-- 수정 버튼 -->
+                        <a class="btn btn-default" href="{% url 'post_edit' pk=post.user.pk pk2=post.post.pk  %}">
+                            <span class="glyphicon glyphicon-pencil"></span>
+                        </a>
+
                         <!-- 공유 버튼 -->
                         <button type="button" lass="btn btn-info btn-lg" data-toggle="modal" data-target="#shareLink">공유</button>
 
@@ -32,7 +37,7 @@
                                          <h4 class="modal-title">공유</h4>
                                     </div>
                                     <div class="modal-body">
-                                        <p> {{ 링크  }} </p>
+                                        <p>  {% url 'post_detail' pk=post.post.pk %}  </p>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>

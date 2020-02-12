@@ -11,7 +11,7 @@
 
                     <!-- 곡 이름 -->
                      <h1><a href="">{{ post.track.title }}</a></h1>
-                    <a class="btn btn-default" href="{% url 'post_new' pk=post.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
+                  <!--  <a class="btn btn-default" href="{% url 'post_new' pk=post.post.pk %}"><span class="glyphicon glyphicon-pencil"></span></a> -->
                     <p>
                         <!-- 좋아요 수 -->
                         <a href="#">
@@ -21,6 +21,11 @@
 
                         <!-- 공유 버튼 -->
                         <button type="button" lass="btn btn-info btn-lg" data-toggle="modal" data-target="#shareLink">공유</button>
+
+                        <!-- 수정 버튼 -->
+                        <a class="btn btn-default" href="{% url 'post_edit' pk=post.post.idx %}">
+                            <span class="glyphicon glyphicon-pencil"></span>
+                        </a>
 
                         <!-- 공유 링크 Modal -->
                         <div id="shareLink" class="modal fade" role="dialog">
@@ -33,7 +38,7 @@
                                          <h4 class="modal-title">공유</h4>
                                     </div>
                                     <div class="modal-body">
-                                        <p> {% url 'post_detail' pk=post.post.pk %} </p>
+                                        <p> {% url 'post_detail' pk=post.post.idx %} </p>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>

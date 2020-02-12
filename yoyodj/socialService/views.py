@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect, get_object_or_404, reverse
 from .models import Posts, Comments, Tracks, Users
 from .social_models import TrackPost
-from .forms import PostForm
+from .forms import PostForm, TrackForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
@@ -12,7 +12,7 @@ from django.http import HttpResponseRedirect
 def list_posts(request):
     try:
         qs = Posts.objects.all()
-        qs = qs.filter(created_dt__lte=datetime.now())
+        qs = qs.filter(created_dt__lte=datetime.utcnow())
         posts = qs.order_by('-created_dt')
         #posts = qs.order_by('-id')
         track_posts = []
@@ -45,17 +45,42 @@ def post_new(request):
     # request.POST, request.FILES
 
     if request.method == "POST":
+        #args = {"form1" = PostForm(request.POST, request.FILES)}
         form = PostForm(request.POST, request.FILES)
+        form2 = TrackForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
-            #post.users_idx = request.user
-            post.post.created_dt = datetime.utcnow()
+            post.users_idx = request.user
+            post.track_idx = request.track_idx
+            post.created_dt = datetime.utcnow()
             post.save()
 
-        return redirect('post_detail', pk=post.post.pk)
+        return redirect('post_detail', pk=post.pk)
     else:
         form = PostForm()
-    return render(request, 'socialService/post_edit.html', {'form': form})
+        form2 = TrackForm()
+    return render(request, 'socialService/post_edit.html', {'form': form, 'form2': form2})
+
+
+def post_edit(request, pk, pk2):
+    user = get_object_or_404(Users, pk=pk)
+    post = get_object_or_404(Posts, pk=pk2)
+    track = post.track_idx
+    if request.method == "POST":
+        form = PostForm(request.POST, request.FILES, instance=post)
+        form2 = TrackForm(request.POST, request.FILES, instance=track)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.users_idx = user
+            post.created_dt = datetime.utcnow()
+            post.save()
+            return redirect('post_detail', pk=post.pk)
+    else:
+        form = PostForm()
+        form2 = TrackForm()
+    return render(request, 'socialService/post_edit.html', {'form': form, 'form2': form2})
+
+
 '''
 # @login_required(login_url = "user:login")
 
