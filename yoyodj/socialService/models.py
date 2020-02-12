@@ -221,6 +221,9 @@ class TrackGenres(models.Model):
         managed = False
         db_table = 'track_genres'
 
+    def __str__(self):
+        return self.name
+
 
 class TrackTypes(models.Model):
     idx = models.AutoField(primary_key=True)
@@ -270,7 +273,10 @@ class Users(models.Model):
     class Meta:
         managed = False
         db_table = 'users'
-
+'''
+    def __str__(self):
+        return self.nickname
+'''
 
 class UsersHasTracks(models.Model):
     idx = models.AutoField(primary_key=True)
