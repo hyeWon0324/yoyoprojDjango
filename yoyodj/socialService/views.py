@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect, get_object_or_404, reverse
 from .models import Posts, Comments, Tracks, Users
 from .social_models import TrackPost
-from .forms import PostForm, TrackForm
+from .forms import PostForm, TrackForm, CommentForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
@@ -41,6 +41,7 @@ def post_detail(request, pk):
     #post = Posts.objects.get(idx=pk)
     return render(request, 'socialService/post_detail.html', {'post': track_post})
 
+
 def post_new(request):
     # request.POST, request.FILES
 
@@ -51,8 +52,12 @@ def post_new(request):
         if form.is_valid():
             post = form.save(commit=False)
             post.users_idx = request.user
-            post.track_idx = request.track_idx
+            #post.track_idx = request.track_idx
             post.created_dt = datetime.utcnow()
+            post.updated_dt = post.created_dt
+
+            track = form2.save(commit=False)
+
             post.save()
 
         return redirect('post_detail', pk=post.pk)
@@ -73,13 +78,39 @@ def post_edit(request, pk, pk2):
             post = form.save(commit=False)
             post.users_idx = user
             post.created_dt = datetime.utcnow()
+            post.updated_dt = datetime.utcnow()
             post.save()
             return redirect('post_detail', pk=post.pk)
     else:
-        form = PostForm()
-        form2 = TrackForm()
+        form = PostForm(instance=post)
+        form2 = TrackForm(instance=track)
     return render(request, 'socialService/post_edit.html', {'form': form, 'form2': form2})
 
+
+def post_remove(request, pk):
+    post = get_object_or_404(Posts, pk=pk)
+    post.delete()
+    return redirect('list_posts')
+
+
+def add_comment_to_post(request, pk):
+    post = get_object_or_404(Posts, pk=pk)
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.posts_idx = post
+            comment.save()
+            return redirect('post_detail', pk=post.pk)
+    else:
+        form = CommentForm()
+    return render(request, 'socialService/add_comment_to_post.html', {'form': form})
+
+
+def comment_remove(request, pk):
+    comment = get_object_or_404(Comments, pk=pk)
+    comment.delete()
+    return redirect('post_detail', pk=comment.posts_idx.pk)
 
 '''
 # @login_required(login_url = "user:login")

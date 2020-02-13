@@ -86,6 +86,14 @@ class Comments(models.Model):
         db_table = 'comments'
         ordering = ['-created_dt']
 
+    def approve(self):
+        self.approved_comment = True
+        self.save()
+
+    def __str__(self):
+        return self.contents
+
+
 
 class DjangoAdminLog(models.Model):
     action_time = models.DateTimeField()
@@ -233,6 +241,9 @@ class TrackTypes(models.Model):
         managed = False
         db_table = 'track_types'
 
+    def __str__(self):
+        return self.name
+
 
 class Tracks(models.Model):
     idx = models.AutoField(primary_key=True)
@@ -250,6 +261,7 @@ class Tracks(models.Model):
     class Meta:
         managed = False
         db_table = 'tracks'
+
 
 
 class Users(models.Model):

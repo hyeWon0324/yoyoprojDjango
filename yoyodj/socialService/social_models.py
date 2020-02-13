@@ -1,4 +1,4 @@
-from .models import Tracks, Posts, Users
+from .models import Tracks, Posts, Users, Comments
 
 
 class TrackPost:
@@ -35,6 +35,7 @@ class TrackPost:
     track = Tracks()
     user = Users()
     post = Posts()
+    comments = Comments()
     url = ''
     hashtags = []
 
