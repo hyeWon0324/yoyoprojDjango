@@ -38,11 +38,13 @@ def list_posts(request):
 def post_detail(request, pk):
     post = get_object_or_404(Posts, pk=pk)
     track_post = TrackPost(track=post.track_idx, post=post, user=post.users_idx)
+    track_post.setComment()
+    form = CommentForm()
     #post = Posts.objects.get(idx=pk)
-    return render(request, 'socialService/post_detail.html', {'post': track_post})
+    return render(request, 'socialService/post_detail.html', {'post': track_post, 'form': form})
 
 
-def post_new(request):
+def post_new(request, pk):
     # request.POST, request.FILES
 
     if request.method == "POST":
@@ -51,12 +53,14 @@ def post_new(request):
         form2 = TrackForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
-            post.users_idx = request.user
+            #post.users_idx = request.user
             #post.track_idx = request.track_idx
             post.created_dt = datetime.utcnow()
             post.updated_dt = post.created_dt
 
             track = form2.save(commit=False)
+
+            track.save()
 
             post.save()
 
@@ -93,23 +97,33 @@ def post_remove(request, pk):
     return redirect('list_posts')
 
 
-def add_comment_to_post(request, pk):
-    post = get_object_or_404(Posts, pk=pk)
+def add_comment_to_post(request, post_id):
+    post = get_object_or_404(Posts, pk=post_id)
     if request.method == "POST":
         form = CommentForm(request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
             comment.posts_idx = post
+            #comment.users_idx = request.user
+            comment.users_idx = post.users_idx
             comment.save()
-            return redirect('post_detail', pk=post.pk)
-    else:
-        form = CommentForm()
-    return render(request, 'socialService/add_comment_to_post.html', {'form': form})
+
+            post.comments_count += 1
+            post.save()
+
+    return redirect('post_detail', pk=post.pk)
+
+    #return render(request, 'socialService/add_comment_to_post.html', {})
 
 
-def comment_remove(request, pk):
-    comment = get_object_or_404(Comments, pk=pk)
+def comment_remove(request, post_id, comment_id):
+    post = get_object_or_404(Posts, pk=post_id)
+    post.comments_count -= 1
+    post.save()
+
+    comment = get_object_or_404(Comments, pk=comment_id)
     comment.delete()
+
     return redirect('post_detail', pk=comment.posts_idx.pk)
 
 '''

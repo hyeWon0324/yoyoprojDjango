@@ -35,7 +35,7 @@ class TrackPost:
     track = Tracks()
     user = Users()
     post = Posts()
-    comments = Comments()
+    comments = []
     url = ''
     hashtags = []
 
@@ -55,4 +55,12 @@ class TrackPost:
         print(self.hashtags)
 
     def setForSummarizedTrack(self, comment_count):
-        self.comment_count = comment_count
+        self.post.comment_count = comment_count
+
+    def setComment(self):
+        self.comments = []
+        qs = Comments.objects.filter(posts_idx=self.post)
+        comments = qs.order_by('-created_dt')
+        for comment in comments:
+            self.comments.append(comment)
+
