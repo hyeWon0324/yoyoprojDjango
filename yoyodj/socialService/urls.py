@@ -7,7 +7,8 @@ urlpatterns = [
     path('upload/', views.post_new, name='post_new'),
     path('post/<int:pk>/<int:pk2>/edit', views.post_edit, name='post_edit'),
     path('post/<int:pk>/remove/', views.post_remove, name='post_remove'),
-    path('post/<int:pk>/comment/', views.add_comment_to_post, name='add_comment_to_post'),
+    path('post/<int:post_id>/comment/', views.add_comment_to_post, name='add_comment_to_post'),
+    path('post/<int:post_id>/comment/<int:comment_id>/remove', views.comment_remove, name='comment_remove'),
 ]
 
 #url(r'^profile/<int:id>', views.list_posts, name='post-stream'),

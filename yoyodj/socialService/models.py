@@ -8,6 +8,7 @@
 from django.db import models
 import datetime
 
+
 class AuthGroup(models.Model):
     name = models.CharField(unique=True, max_length=150)
 
@@ -94,7 +95,6 @@ class Comments(models.Model):
         return self.contents
 
 
-
 class DjangoAdminLog(models.Model):
     action_time = models.DateTimeField()
     object_id = models.TextField(blank=True, null=True)
@@ -172,6 +172,9 @@ class Messages(models.Model):
     class Meta:
         managed = False
         db_table = 'messages'
+
+    def __str__(self):
+        return self.contents
 
 
 class Notifications(models.Model):
@@ -262,6 +265,8 @@ class Tracks(models.Model):
         managed = False
         db_table = 'tracks'
 
+    def __str__(self):
+        return f'Title: {self.title}'
 
 
 class Users(models.Model):
@@ -288,6 +293,7 @@ class Users(models.Model):
 '''
     def __str__(self):
         return self.nickname
+
 '''
 
 class UsersHasTracks(models.Model):

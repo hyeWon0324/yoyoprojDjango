@@ -8,10 +8,10 @@
                          {{ post.post.created_dt }}
                     </div>
 
-
                     <!-- 곡 이름 -->
                      <h1><a href="">{{ post.track.title }}</a></h1>
                   <!--  <a class="btn btn-default" href="{#% url 'post_new' pk=post.post.pk %#}"><span class="glyphicon glyphicon-pencil"></span></a> -->
+
                     <p>
                         <!-- 좋아요 수 -->
                         <a href="#">
@@ -56,27 +56,43 @@
                         <span class="glyphicon glyphicon-play"></span>
                             {{ post.track.played_count }}
 
-                        <!-- 댓글 -->
-                        <a href="{% url 'add_comment_to_post' pk=post.post.pk %}">
-                            <span class="glyphicon glyphicon-comment"></span>
-                        </a>
-                            {{ post.post.comments_count }}
                     </p>
 
                     <!-- 포스팅 내용 -->
-                    <p>{{ post.post.contents|linebreaksbr }}</p>
-
+                    <p>{{ post.post.contents|linebreaks }}</p>
 
                     {% for tag in post.hashtags %}
                                <button type="button" class="btn"> {{ tag }}</button>
                     {% endfor %}
                     <br> <br>
 
-                    {% for comment in post.comments.all %}
+                    <!-- 댓글 작성 -->
+                    <form method="POST" class="post-form">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                    </form>
+
+                    <a href="{% url 'add_comment_to_post'  post_id=post.post.pk %}">
+                        <span class="glyphicon glyphicon-ok"></span>
+                    </a>
+
+                    <!-- 댓글 개수 -->
+                    <span class="glyphicon glyphicon-comment"></span>
+                        {{ post.post.comments_count }}
+
+
+
+                    <!-- 댓글 리스트 -->
+                    {% for comment in post.comments %}
                         <div class="comment">
                             <div class="date">{{ comment.created_dt }}</div>
-                            <strong>{{ comment.users_idx.name }}</strong>
-                            <p>{{ comment.text|linebreaks }}</p>
+
+                            <strong>
+                                <a href="">
+                                {{ comment.users_idx.nickname }}</a>
+                            </strong>
+
+                            <p>{{ comment.contents|linebreaks }}</p>
                         </div>
                         {% empty %}
                         <p> 댓글 없음 </p>
