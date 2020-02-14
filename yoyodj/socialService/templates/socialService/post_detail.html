@@ -13,11 +13,39 @@
                   <!--  <a class="btn btn-default" href="{#% url 'post_new' pk=post.post.pk %#}"><span class="glyphicon glyphicon-pencil"></span></a> -->
 
                     <p>
+
+                        <!-- 좋아요 버튼 -->
+                        <a href="#">
+                            <span class="like-btn btn-like-post glyphicon glyphicon-heart"></span>
+                        </a>
+
+                        <!--<script src="static/js/trackpost.js"></script>-->
+                        <script>
+                            $(function () {
+                                $('.like-btn').on('click', function(){
+                                    likePost(this)
+                                });
+
+                                function likePost(heart) {
+                                    if (post.user.is_authenticated) {
+                                        $(heart).toggleClass('btn-like-post')
+                                        id = $('.like-btn').index(heart)+1
+                                        var url = ''
+                                    } else {
+                                    }
+                                }
+
+                            })
+                        </script>
+
+                        <button type="button" class="sc-button sc-button-small sc-button-responsive" aria-describedby="tooltip-3823" tabindex="0" title="Like" aria-label="Like">
+                             {{ post.post.likes_count }}
+                        </button>
+
                         <!-- 좋아요 수 -->
                         <a href="#">
-                            <span class="glyphicon glyphicon-heart"></span>
+
                         </a>
-                        {{ post.post.likes_count }}
 
                         <!-- 공유 버튼 -->
                         <button type="button" lass="btn btn-info btn-lg" data-toggle="modal" data-target="#shareLink">공유</button>
@@ -91,6 +119,10 @@
                                 <a href="">
                                 {{ comment.users_idx.nickname }}</a>
                             </strong>
+
+                            <a class="btn btn-default" href="{% url 'comment_remove' post_id=post.post.pk comment_id=comment.pk %}">
+                                     <span class="glyphicon glyphicon-remove"></span>
+                            </a>
 
                             <p>{{ comment.contents|linebreaks }}</p>
                         </div>
