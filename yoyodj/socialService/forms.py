@@ -7,13 +7,16 @@ class PostForm(forms.ModelForm):
     contents = forms.CharField(
         max_length=2000,
         widget=forms.Textarea(),
-        help_text='Write here your description!'
+        help_text='Write your description!'
     )
 
     class Meta:
-       # model = TrackPost
+        # model = TrackPost
         model = Posts
         fields = ('contents', 'tags', 'users_idx', 'track_idx')
+        labels = {
+            'contents': 'desc'
+        }
 
 
 class TrackForm(forms.ModelForm):

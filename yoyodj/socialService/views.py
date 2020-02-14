@@ -1,7 +1,7 @@
 from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect, get_object_or_404, reverse
-from .models import Posts, Comments, Tracks, Users
+from .models import Posts, Comments, Tracks, Users, Likes, Friends
 from .social_models import TrackPost
 from .forms import PostForm, TrackForm, CommentForm
 from django.contrib import messages
@@ -44,7 +44,7 @@ def post_detail(request, pk):
     return render(request, 'socialService/post_detail.html', {'post': track_post, 'form': form})
 
 
-def post_new(request, pk):
+def post_new(request):
     # request.POST, request.FILES
 
     if request.method == "POST":
@@ -93,8 +93,33 @@ def post_edit(request, pk, pk2):
 
 def post_remove(request, pk):
     post = get_object_or_404(Posts, pk=pk)
-    post.delete()
-    return redirect('list_posts')
+
+    if request.user.is_authenticated():
+        post.delete()
+        return redirect('list_posts')
+
+    return redirect('post_detail', pk=post.pk)
+
+
+def already_liked_post(user, post_id):
+
+    post = Posts.objects.get(pk=post_id)
+    return Likes.objects.filter(users_idx=user, posts_idx=post).exists()
+
+
+def like_post(request, post_id):
+
+    if request.user.is_authenticated():
+        post = Posts.objects.get(id=post_id)
+
+        if already_liked_post(request.user, post_id):
+            Likes.objects.filter(users_idx=request.user, posts_idx=post).delete()
+        else:
+            Likes.objects.create(users_idx=request.user, posts_idx=post, created_dt=datetime.now())
+
+        return redirect(reverse('index'))
+    else:
+        return redirect(reverse('list_posts'))
 
 
 def add_comment_to_post(request, post_id):
@@ -113,8 +138,6 @@ def add_comment_to_post(request, post_id):
 
     return redirect('post_detail', pk=post.pk)
 
-    #return render(request, 'socialService/add_comment_to_post.html', {})
-
 
 def comment_remove(request, post_id, comment_id):
     post = get_object_or_404(Posts, pk=post_id)
@@ -125,6 +148,20 @@ def comment_remove(request, post_id, comment_id):
     comment.delete()
 
     return redirect('post_detail', pk=comment.posts_idx.pk)
+
+
+def get_profile_avatar():
+    pass
+
+def get_user_badge():
+    followers = 0
+    track_count = 0
+    username =''
+    avatar = ''
+
+
+
+
 
 '''
 # @login_required(login_url = "user:login")
