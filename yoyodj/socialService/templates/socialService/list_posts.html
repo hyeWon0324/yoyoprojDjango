@@ -5,7 +5,7 @@
 
                     <!-- 업로드 날짜 -->
                     <div class="date">
-                         {{ post.post.created_dt }}
+                         {{ post.post.created_dt|timesince }} ago
                     </div>
 
 
@@ -66,5 +66,11 @@
                         {% endfor %}
                     </p>
                 </div>
+    {% empty %}
+        {% if request.GET.q %}
+            <p> 업로드된 곡을 찾지 못했습니다 </p>
+        {% else %}
+            <p> 아직 업로드된 곡이 없습니다 </p>
+        {% endif %}
     {% endfor %}
 {% endblock %}

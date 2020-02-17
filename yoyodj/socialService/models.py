@@ -6,6 +6,8 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
+from yoyodj.accounts.models import Users
+
 import datetime
 
 
@@ -269,27 +271,27 @@ class Tracks(models.Model):
         return f'Title: {self.title}'
 
 
-class Users(models.Model):
-    idx = models.AutoField(primary_key=True)
-    user_id = models.CharField(unique=True, max_length=45)
-    pw = models.CharField(max_length=80)
-    nickname = models.CharField(max_length=45, blank=True, null=True)
-    email = models.CharField(max_length=45)
-    profile = models.CharField(max_length=500, blank=True, null=True)
-    salt = models.CharField(max_length=64)
-    follower_count = models.IntegerField(blank=True, null=True)
-    following_count = models.IntegerField(blank=True, null=True)
-    tracks_count = models.IntegerField(blank=True, null=True)
-    grade = models.IntegerField()
-    status = models.IntegerField()
-    created_dt = models.DateTimeField(default=datetime.datetime.utcnow())
-    access_dt = models.DateTimeField(blank=True, null=True)
-    updated_dt = models.DateTimeField(blank=True, null=True)
-    refresh_token = models.CharField(max_length=225, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'users'
+# class Users(models.Model):
+#     idx = models.AutoField(primary_key=True)
+#     user_id = models.CharField(unique=True, max_length=45)
+#     pw = models.CharField(max_length=80)
+#     nickname = models.CharField(max_length=45, blank=True, null=True)
+#     email = models.CharField(max_length=45)
+#     profile = models.CharField(max_length=500, blank=True, null=True)
+#     salt = models.CharField(max_length=64)
+#     follower_count = models.IntegerField(blank=True, null=True)
+#     following_count = models.IntegerField(blank=True, null=True)
+#     tracks_count = models.IntegerField(blank=True, null=True)
+#     grade = models.IntegerField()
+#     status = models.IntegerField()
+#     created_dt = models.DateTimeField(default=datetime.datetime.utcnow())
+#     access_dt = models.DateTimeField(blank=True, null=True)
+#     updated_dt = models.DateTimeField(blank=True, null=True)
+#     refresh_token = models.CharField(max_length=225, blank=True, null=True)
+#
+#     class Meta:
+#         managed = False
+#         db_table = 'users'
 '''
     def __str__(self):
         return self.nickname

@@ -1,14 +1,81 @@
 from datetime import datetime
+from django import forms
+from django.forms.utils import ErrorList
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect, get_object_or_404, reverse
-from .models import Posts, Comments, Tracks, Users, Likes, Friends
+from .models import Posts, Comments, Tracks, Likes, Friends
+from yoyodj.accounts.models import *
 from .social_models import TrackPost
 from .forms import PostForm, TrackForm, CommentForm
+from .mixins import FormUserNeededMixin, UserOwnerMixin
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
+from django.urls import reverse_lazy
+from django.views import View
+from django.views.generic import (
+                CreateView,
+                DetailView,
+                DeleteView,
+                ListView,
+                UpdateView
+                )
 
 
+class PostCreateView(FormUserNeededMixin, CreateView):
+    form_class = PostForm
+    template_name = 'socialService/post_upload.html'
+    #success_url = 'socialService/upload/'
+
+    def form_valid(self, form: object):
+        if self.request.user.is_authenticated():
+            form.instance.users_idx = self.request.user
+            return super(PostCreateView, self).form_valid(form)
+        else:
+            form._errors[forms.forms.NON_FIELD_ERRORS] = ErrorList["로그인하세요"]
+            return self.form_invalid(form)
+
+
+class PostUpdateView(LoginRequiredMixin, UserOwnerMixin, UpdateView):
+    queryset = Posts.objects.all()
+    form_class = PostForm
+    template_name = 'socialService/post_upload.html'
+
+
+class PostDetailView(DetailView):
+    template_name = "socialService/post_detail.html"
+    queryset = Posts.objects.all()
+
+    def get_object(self):
+        pk = self.kwargs.get("pk")
+        return Posts.objects.get(pk=pk)
+
+
+class PostListView(ListView):
+    template_name = "socialService/list_posts.html"
+
+    def get_queryset(self):
+        qs = Posts.objects.all()
+        print(self.request.GET)
+        query = self.request.GET.get("q", None)
+        if query is not None:
+            qs = qs.filter(content__icontains=query)
+
+        return qs
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(PostListView, self).get_context_data(*args, **kwargs)
+        return context
+
+
+def get_users():
+    # Queries 3 tables: cookbook_recipe, cookbook_ingredient,
+    # and cookbook_food.
+    return list(Users.objects.prefetch_related('h'))
+
+'''
 def list_posts(request):
     try:
         qs = Posts.objects.all()
@@ -17,15 +84,6 @@ def list_posts(request):
         #posts = qs.order_by('-id')
         track_posts = []
         for post in posts:
-            '''
-            track = post.track_idx
-            track_post = TrackPost(title=track.title, track_type=track.type_idx,
-                                   played_count=track.played_count, moods=track.moods, genre=track.genre_idx,
-                                   track_source=track.track_source, image=track.image,
-                                   tags=post.tags, contents=post.contents, comment_count=post.comments_count,
-                                   likes_count=post.likes_count, follower_count=post.follower_count,
-                                   created_dt=post.created_dt, updated_dt=post.updated_dt)
-            '''
             track_post = TrackPost(track=post.track_idx, post=post, user=post.users_idx)
             track_posts.append(track_post)
 
@@ -159,7 +217,7 @@ def get_user_badge():
     username =''
     avatar = ''
 
-
+'''
 
 
 

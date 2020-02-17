@@ -1,22 +1,30 @@
 from django import forms
 #from .social_models import TrackPost
-from .models import Posts, Tracks, Users, Comments
+from .models import Posts, Tracks, Comments
+
 
 
 class PostForm(forms.ModelForm):
     contents = forms.CharField(
         max_length=2000,
-        widget=forms.Textarea(),
-        help_text='Write your description!'
+        widget=forms.Textarea(
+            attrs={'placeholder': "곡 정보를 입력하세요",
+                   "class": "form-control"}
+        ),
+        label='desc',
+        help_text='정보입력란'
     )
 
     class Meta:
         # model = TrackPost
         model = Posts
         fields = ('contents', 'tags', 'users_idx', 'track_idx')
-        labels = {
-            'contents': 'desc'
-        }
+
+    def clean_content(self, *args, **kwargs):
+        content = self.cleaned_data("content")
+        if content == "":
+            raise forms.ValidationError("Cannot be blank")
+        return content
 
 
 class TrackForm(forms.ModelForm):

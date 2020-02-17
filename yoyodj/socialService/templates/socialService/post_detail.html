@@ -113,18 +113,24 @@
                     <!-- 댓글 리스트 -->
                     {% for comment in post.comments %}
                         <div class="comment">
-                            <div class="date">{{ comment.created_dt }}</div>
+                            <div class="date">{{ comment.created_dt |timesince}} ago</div>
+                            <div class="media">
+                                <div class="media-left">
+                                    <img src="img_avatar1.png" class="media-object" style="width:60px">
+                                </div>
+                                <div class="media-body">
+                                    <strong class="media-heading">
+                                        <a href="">
+                                        {{ comment.users_idx.nickname }}</a>
+                                    </strong>
 
-                            <strong>
-                                <a href="">
-                                {{ comment.users_idx.nickname }}</a>
-                            </strong>
+                                    <a class="btn btn-default" href="{% url 'comment_remove' post_id=post.post.pk comment_id=comment.pk %}">
+                                             <span class="glyphicon glyphicon-remove"></span>
+                                    </a>
 
-                            <a class="btn btn-default" href="{% url 'comment_remove' post_id=post.post.pk comment_id=comment.pk %}">
-                                     <span class="glyphicon glyphicon-remove"></span>
-                            </a>
-
-                            <p>{{ comment.contents|linebreaks }}</p>
+                                    <p>{{ comment.contents|linebreaks }}</p>
+                                </div>
+                            </div>
                         </div>
                         {% empty %}
                         <p> 댓글 없음 </p>
