@@ -23,7 +23,7 @@ from django.views.generic import (
                 UpdateView
                 )
 
-
+''''
 class PostCreateView(FormUserNeededMixin, CreateView):
     form_class = PostForm
     template_name = 'socialService/post_upload.html'
@@ -43,6 +43,11 @@ class PostUpdateView(LoginRequiredMixin, UserOwnerMixin, UpdateView):
     form_class = PostForm
     template_name = 'socialService/post_upload.html'
 
+
+class PostDeleteView(LoginRequiredMixin, DeleteView):
+    model = Posts
+    template_name = 'tweets/delete_confirm.html'
+    success_url = reverse_lazy("post:list") #reverse()
 
 class PostDetailView(DetailView):
     template_name = "socialService/post_detail.html"
@@ -74,8 +79,8 @@ def get_users():
     # Queries 3 tables: cookbook_recipe, cookbook_ingredient,
     # and cookbook_food.
     return list(Users.objects.prefetch_related('h'))
-
 '''
+
 def list_posts(request):
     try:
         qs = Posts.objects.all()
@@ -217,7 +222,6 @@ def get_user_badge():
     username =''
     avatar = ''
 
-'''
 
 
 
