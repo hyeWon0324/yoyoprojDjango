@@ -1,29 +1,39 @@
-
 from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
-
+from ..models import Users
 from rest_framework import serializers
 
 
-User = get_user_model()
-
-class UserDisplaySerializer(serializers.ModelSerializer):
-    follower_count = serializers.SerializerMethodField()
-    url = serializers.SerializerMethodField()
+class Users(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = Users
         fields = [
-            'username',
-            'first_name',
-            'last_name',
+            'objects',
+            'idx',
+            'user_id',
+            'pw',
+            'nickname',
+            'email',
+            'profile',
+            'salt',
             'follower_count',
-            'url',
+            'following_count',
+            'tracks_count',
+            'grade',
+            'status',
+            'created_dt',
+            'access_dt',
+            'updated_dt',
+            'refresh_token',
             # 'email',
         ]
 
-    def get_follower_count(self, obj):
-        return 0
-
-    def get_url(self, obj):
-        return reverse_lazy("profiles:detail", kwargs={"username": obj.username })
-
+class Friends(serializers.ModelSerializer):
+    class Meta:
+        model = Users
+        fields = [
+        'idx',
+        'sender_idx',
+        'receiver_idx',
+        'created_dt'
+        ]

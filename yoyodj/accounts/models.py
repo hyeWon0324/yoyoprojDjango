@@ -3,49 +3,15 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.urls import reverse_lazy
 import datetime
+
+
 # Create your models here.
 
-
-class UserProfileManager(models.Manager):
-    use_for_related_fields = True
-
-    def all(self):
-        qs = self.get_queryset().all()
-        try:
-            if self.instance:
-                qs = qs.exclude(user=self.instance)
-        except:
-            pass
-        return qs
-
-    def toggle_follow(self, user, to_toggle_user):
-        user_profile, created = Users.objects.get_or_create(user=user) # (user_obj, true)
-        if to_toggle_user in user_profile.following.all():
-            user_profile.following.remove(to_toggle_user)
-            added = False
-        else:
-            user_profile.following.add(to_toggle_user)
-            added = True
-        return added
-
-    def is_following(self, user, followed_by_user):
-        user_profile, created = Users.objects.get_or_create(user=user)
-        if created:
-            return False
-        if followed_by_user in user_profile.following.all():
-            return True
-        return False
-
-    def recommended(self, user, limit_to=10):
-        print(user)
-        profile = user.profile 
-        following = profile.following.all()
-        following = profile.get_following()
-        qs = self.get_queryset().exclude(user__in=following).exclude(id=profile.id).order_by("?")[:limit_to]
-        return qs
+# follow manager related user
 
 
 class Users(models.Model):
+    objects = models.Manager()
     idx = models.AutoField(primary_key=True)
     user_id = models.CharField(unique=True, max_length=45)
     pw = models.CharField(max_length=80)
@@ -68,10 +34,11 @@ class Users(models.Model):
         db_table = 'users'
 
     def __str__(self):
-        return str(self.following_count)
+        return str(self)
 
 
 class Friends(models.Model):
+    objects = models.Manager()
     idx = models.AutoField(primary_key=True)
     sender_idx = models.ForeignKey('Users', models.DO_NOTHING, db_column='sender_idx', related_name='fk_friends_1')
     receiver_idx = models.ForeignKey('Users', models.DO_NOTHING, db_column='receiver_idx', related_name='fk_friends_2')
@@ -81,15 +48,35 @@ class Friends(models.Model):
         managed = False
         db_table = 'friends'
 
-    def get_following(self):
-        users = Friends.sender_idx.all()  # User.objects.all().exclude(username=self.user.username)
-        return users.exclude(username=self.user.username)
+    def get_following(self, profile_user):
+        qs = Friends.objects.filter(sender_idx=profile_user).values('receiver_idx')
+        return qs
+    # users = []
+    # qs = Friends.objects.filter(sender_idx=profile_user).values('receiver_idx')
+    # for q in qs:
+    #     users.insert(Users.objects.get(idx=q))  # User.objects.all().exclude(username=self.user.username)
+    #
+    # return users
 
-    def get_follow_url(self):
-        return reverse_lazy("profiles:follow", kwargs={"username": self.user.username})
+    def toggle_follow(self, user, to_toggle_user):
+        friend, created = Friends.objects.get_or_create(sender_idx=user)  # (user_obj, true)
+        # to_toggle_user -> current user가 팔로우 하고 싶은 사람을 받은
+        if to_toggle_user in friend.receiver_idx.all():
+            Friends.objects.delete(receiver_idx=to_toggle_user)
+            added = False
+        else:
+            follow = Friends(sender_idx=user, receiver_idx=to_toggle_user)
+            follow.save()
+            added = True
+        return added
 
-    def get_absolute_url(self):
-        return reverse_lazy("profiles:detail", kwargs={"username": self.user.username})
+    def is_following(self, user, followed_by_user):
+        friend, created = Friends.objects.get_or_create(sender_idx=user)
+        if created:
+            return False
+        if followed_by_user in friend.receiver_idx.all():
+            return True
+        return False
 
 
 '''
@@ -116,6 +103,7 @@ class UserProfile(models.Model):
         return reverse_lazy("profiles:detail", kwargs={"username":self.user.username})
 '''
 
+
 # cfe = User.objects.first()
 # User.objects.get_or_create() # (user_obj, true/false)
 # cfe.save()
@@ -129,9 +117,3 @@ def post_save_user_receiver(sender, instance, created, *args, **kwargs):
 
 
 post_save.connect(post_save_user_receiver, sender=settings.AUTH_USER_MODEL)
-
-
-
-
-
-

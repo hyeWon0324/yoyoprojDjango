@@ -23,7 +23,9 @@ from django.views.generic import (
                 UpdateView
                 )
 
-''''
+
+
+
 class PostCreateView(FormUserNeededMixin, CreateView):
     form_class = PostForm
     template_name = 'socialService/post_upload.html'
@@ -79,7 +81,7 @@ def get_users():
     # Queries 3 tables: cookbook_recipe, cookbook_ingredient,
     # and cookbook_food.
     return list(Users.objects.prefetch_related('h'))
-'''
+
 
 def list_posts(request):
     try:
