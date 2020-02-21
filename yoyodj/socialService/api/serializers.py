@@ -23,7 +23,7 @@ class TrackModelSerializer(serializers.ModelSerializer):
 
 
 class PostModelSerializer(serializers.ModelSerializer):
-
+    access_token = serializers.SerializerMethodField()
     track_idx = TrackModelSerializer(read_only=True)
     did_like = serializers.SerializerMethodField()
 
@@ -41,9 +41,14 @@ class PostModelSerializer(serializers.ModelSerializer):
             'updated_dt',
         ]
 
+    def get_access(self):
+        pass
+
+
+
     def get_did_like(self, obj):
         try:
-            user = request.user
+            user = self.request.user
             if user.is_authenticated():
                 if user in obj.liked.all():
                     return True
