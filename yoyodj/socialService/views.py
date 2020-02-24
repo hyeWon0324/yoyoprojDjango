@@ -24,8 +24,6 @@ from django.views.generic import (
                 )
 
 
-
-
 class PostCreateView(FormUserNeededMixin, CreateView):
     form_class = PostForm
     template_name = 'socialService/post_upload.html'

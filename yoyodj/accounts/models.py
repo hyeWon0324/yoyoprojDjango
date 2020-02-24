@@ -48,7 +48,7 @@ class Friends(models.Model):
         managed = False
         db_table = 'friends'
 
-    def get_following(self, profile_user):
+    def get_following_users(self, profile_user):
         qs = Friends.objects.filter(sender_idx=profile_user).values('receiver_idx')
         return qs
     # users = []
@@ -57,6 +57,10 @@ class Friends(models.Model):
     #     users.insert(Users.objects.get(idx=q))  # User.objects.all().exclude(username=self.user.username)
     #
     # return users
+
+    def get_followers(self, profile_user):
+        qs = Friends.objects.filter(receiver_idx=profile_user).values('receiver_idx')
+        return qs
 
     def toggle_follow(self, user, to_toggle_user):
         friend, created = Friends.objects.get_or_create(sender_idx=user)  # (user_obj, true)

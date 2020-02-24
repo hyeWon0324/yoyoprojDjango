@@ -162,6 +162,26 @@ class Likes(models.Model):
         managed = False
         db_table = 'likes'
 
+    def get_user_likes_count(self, user):
+        likes_count = 0
+        try:
+            qs = Likes.objects.filter(users_idx=user)
+            likes_count = qs.count()
+
+        except:
+            pass
+
+        return likes_count
+
+
+    def get_liked_posts(self,user):
+        try:
+            qs = Likes.objects.filter(users_idx=user)
+            return qs
+        except:
+            pass
+
+
 
 class Messages(models.Model):
     idx = models.AutoField(primary_key=True)

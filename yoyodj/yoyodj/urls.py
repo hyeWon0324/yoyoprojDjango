@@ -22,5 +22,5 @@ urlpatterns = [
     path('main/', include('mainpage.urls')),
     path('profile/', include('profilepage.urls')),
     path('accounts/', include('accounts.urls')),
-    path('api/post/', include('socialService.api.urls'))
+    path('api/profile/', include('socialService.api.urls'))
 ]

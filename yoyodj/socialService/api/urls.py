@@ -9,5 +9,10 @@ from .views import (
     )
 
 urlpatterns = [
-    path('', PostListAPIView.as_view(), name='list'),  # /api/tweet/
+    path('feeds/<int:user_id>/', PostListAPIView.as_view(), name='list'),  # /api/profile/
+    path('mr/<int:user_id>/'),
+    path('song/<int:user_id>/'),
+    path('following/<int:user_id>/'),
+    path('followers/<int:user_id>/'),
+    path('likes/<int:user_id>/'),
 ]
