@@ -8,7 +8,7 @@ from django.views.generic.edit import FormView
 # Create your views here.
 
 from .forms import UserRegisterForm
-from .models import Users
+from .models import Users, Friends
 
 User = get_user_model()
 

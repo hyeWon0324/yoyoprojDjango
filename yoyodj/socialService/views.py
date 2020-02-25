@@ -3,7 +3,8 @@ from django import forms
 from django.forms.utils import ErrorList
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect, get_object_or_404, reverse
-from .models import Posts, Comments, Tracks, Likes, Friends
+from .models import Posts, Comments, Tracks, Likes
+
 from yoyodj.accounts.models import *
 from .social_models import TrackPost
 from .forms import PostForm, TrackForm, CommentForm

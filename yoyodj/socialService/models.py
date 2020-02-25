@@ -77,12 +77,21 @@ class AuthUserUserPermissions(models.Model):
         unique_together = (('user', 'permission'),)
 
 
+class CommentsManager(models.Manager):
+
+    def get_user_comment_counts(self, user):
+        qs = Comments.objects.filter(users_idx=user)
+        return qs.count()
+
+
 class Comments(models.Model):
     idx = models.AutoField(primary_key=True)
     contents = models.CharField(max_length=225)
     users_idx = models.ForeignKey('Users', models.DO_NOTHING, db_column='users_idx')
     posts_idx = models.ForeignKey('Posts', models.DO_NOTHING, db_column='posts_idx')
     created_dt = models.DateTimeField(default=datetime.datetime.utcnow())
+
+    objects = CommentsManager()
 
     class Meta:
         managed = False
@@ -141,33 +150,28 @@ class DjangoSession(models.Model):
         db_table = 'django_session'
 
 
-class Friends(models.Model):
-    idx = models.AutoField(primary_key=True)
-    sender_idx = models.ForeignKey('Users', models.DO_NOTHING, db_column='sender_idx', related_name='fk_friends_1')
-    receiver_idx = models.ForeignKey('Users', models.DO_NOTHING, db_column='receiver_idx', related_name='fk_friends_2')
-    created_dt = models.DateTimeField(default=datetime.datetime.utcnow())
 
-    class Meta:
-        managed = False
-        db_table = 'friends'
+# class Friends(models.Model):
+#     idx = models.AutoField(primary_key=True)
+#     sender_idx = models.ForeignKey('Users', models.DO_NOTHING, db_column='sender_idx', related_name='fk_friends_1')
+#     receiver_idx = models.ForeignKey('Users', models.DO_NOTHING, db_column='receiver_idx', related_name='fk_friends_2')
+#     created_dt = models.DateTimeField(default=datetime.datetime.utcnow())
+#
+#     objects = FriendsManager()
+#
+#     class Meta:
+#         managed = False
+#         db_table = 'friends'
 
 
-class Likes(models.Model):
-    idx = models.AutoField(primary_key=True)
-    users_idx = models.ForeignKey('Users', models.DO_NOTHING, db_column='users_idx', related_name='fk_likes_1')
-    posts_idx = models.ForeignKey('Posts', models.DO_NOTHING, db_column='posts_idx', related_name='fk_likes_2')
-    created_dt = models.DateTimeField(default=datetime.datetime.utcnow())
-
-    class Meta:
-        managed = False
-        db_table = 'likes'
+class LikesManager(models.Manager):
 
     def get_user_likes_count(self, user):
         likes_count = 0
         try:
             qs = Likes.objects.filter(users_idx=user)
             likes_count = qs.count()
-
+            return likes_count
         except:
             pass
 
@@ -180,6 +184,19 @@ class Likes(models.Model):
             return qs
         except:
             pass
+
+class Likes(models.Model):
+    idx = models.AutoField(primary_key=True)
+    users_idx = models.ForeignKey('Users', models.DO_NOTHING, db_column='users_idx', related_name='fk_likes_1')
+    posts_idx = models.ForeignKey('Posts', models.DO_NOTHING, db_column='posts_idx', related_name='fk_likes_2')
+    created_dt = models.DateTimeField(default=datetime.datetime.utcnow())
+
+    objects = LikesManager()
+
+    class Meta:
+        managed = False
+        db_table = 'likes'
+
 
 
 
@@ -290,33 +307,85 @@ class Tracks(models.Model):
     def __str__(self):
         return f'Title: {self.title}'
 
+# follow manager related user
+class FriendsManager(models.Manager):
 
-# class Users(models.Model):
-#     idx = models.AutoField(primary_key=True)
-#     user_id = models.CharField(unique=True, max_length=45)
-#     pw = models.CharField(max_length=80)
-#     nickname = models.CharField(max_length=45, blank=True, null=True)
-#     email = models.CharField(max_length=45)
-#     profile = models.CharField(max_length=500, blank=True, null=True)
-#     salt = models.CharField(max_length=64)
-#     follower_count = models.IntegerField(blank=True, null=True)
-#     following_count = models.IntegerField(blank=True, null=True)
-#     tracks_count = models.IntegerField(blank=True, null=True)
-#     grade = models.IntegerField()
-#     status = models.IntegerField()
-#     created_dt = models.DateTimeField(default=datetime.datetime.utcnow())
-#     access_dt = models.DateTimeField(blank=True, null=True)
-#     updated_dt = models.DateTimeField(blank=True, null=True)
-#     refresh_token = models.CharField(max_length=225, blank=True, null=True)
-#
-#     class Meta:
-#         managed = False
-#         db_table = 'users'
-'''
+    def get_following_users(self, profile_user):
+        qs = Friends.objects.filter(sender_idx=profile_user).values('receiver_idx')
+        return qs
+
+    # users = []
+    # qs = Friends.objects.filter(sender_idx=profile_user).values('receiver_idx')
+    # for q in qs:
+    #     users.insert(Users.objects.get(idx=q))  # User.objects.all().exclude(username=self.user.username)
+    #
+    # return users
+
+    def get_followers(self, profile_user):
+        qs = Friends.objects.filter(receiver_idx=profile_user).values('receiver_idx')
+        return qs
+
+    def toggle_follow(self, user, to_toggle_user):
+        friend, created = Friends.objects.get_or_create(sender_idx=user)  # (user_obj, true)
+        # to_toggle_user -> current user가 팔로우 하고 싶은 사람을 받은
+        if to_toggle_user in friend.receiver_idx.all():
+            Friends.objects.delete(receiver_idx=to_toggle_user)
+            added = False
+        else:
+            follow = Friends(sender_idx=user, receiver_idx=to_toggle_user)
+            follow.save()
+            added = True
+        return added
+
+    def is_following(self, user, followed_by_user):
+        friend, created = Friends.objects.get_or_create(sender_idx=user)
+        if created:
+            return False
+        if followed_by_user in friend.receiver_idx.all():
+            return True
+        return False
+
+
+class Users(models.Model):
+    objects = models.Manager()
+    idx = models.AutoField(primary_key=True)
+    user_id = models.CharField(unique=True, max_length=45)
+    pw = models.CharField(max_length=80)
+    nickname = models.CharField(max_length=45, blank=True, null=True)
+    email = models.CharField(max_length=45)
+    profile = models.CharField(max_length=500, blank=True, null=True)
+    salt = models.CharField(max_length=64)
+    follower_count = models.IntegerField(blank=True, null=True)
+    following_count = models.IntegerField(blank=True, null=True)
+    tracks_count = models.IntegerField(blank=True, null=True)
+    grade = models.IntegerField()
+    status = models.IntegerField()
+    created_dt = models.DateTimeField(default=datetime.datetime.utcnow())
+    access_dt = models.DateTimeField(blank=True, null=True)
+    updated_dt = models.DateTimeField(blank=True, null=True)
+    refresh_token = models.CharField(max_length=225, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'users'
+
     def __str__(self):
-        return self.nickname
+        return str(self)
 
-'''
+
+class Friends(models.Model):
+    objects = models.Manager()
+    idx = models.AutoField(primary_key=True)
+    sender_idx = models.ForeignKey('Users', models.DO_NOTHING, db_column='sender_idx', related_name='fk_friends_1')
+    receiver_idx = models.ForeignKey('Users', models.DO_NOTHING, db_column='receiver_idx', related_name='fk_friends_2')
+    created_dt = models.DateTimeField(default=datetime.datetime.utcnow())
+
+    objects = FriendsManager()
+
+    class Meta:
+        managed = False
+        db_table = 'friends'
+
 
 class UsersHasTracks(models.Model):
     idx = models.AutoField(primary_key=True)

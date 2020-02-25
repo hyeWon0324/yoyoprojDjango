@@ -8,6 +8,42 @@ import datetime
 # Create your models here.
 
 # follow manager related user
+class FriendsManager(models.Manager):
+
+    def get_following_users(self, profile_user):
+        qs = Friends.objects.filter(sender_idx=profile_user).values('receiver_idx')
+        return qs
+
+    # users = []
+    # qs = Friends.objects.filter(sender_idx=profile_user).values('receiver_idx')
+    # for q in qs:
+    #     users.insert(Users.objects.get(idx=q))  # User.objects.all().exclude(username=self.user.username)
+    #
+    # return users
+
+    def get_followers(self, profile_user):
+        qs = Friends.objects.filter(receiver_idx=profile_user).values('receiver_idx')
+        return qs
+
+    def toggle_follow(self, user, to_toggle_user):
+        friend, created = Friends.objects.get_or_create(sender_idx=user)  # (user_obj, true)
+        # to_toggle_user -> current user가 팔로우 하고 싶은 사람을 받은
+        if to_toggle_user in friend.receiver_idx.all():
+            Friends.objects.delete(receiver_idx=to_toggle_user)
+            added = False
+        else:
+            follow = Friends(sender_idx=user, receiver_idx=to_toggle_user)
+            follow.save()
+            added = True
+        return added
+
+    def is_following(self, user, followed_by_user):
+        friend, created = Friends.objects.get_or_create(sender_idx=user)
+        if created:
+            return False
+        if followed_by_user in friend.receiver_idx.all():
+            return True
+        return False
 
 
 class Users(models.Model):
@@ -44,43 +80,12 @@ class Friends(models.Model):
     receiver_idx = models.ForeignKey('Users', models.DO_NOTHING, db_column='receiver_idx', related_name='fk_friends_2')
     created_dt = models.DateTimeField(default=datetime.datetime.utcnow())
 
+    objects = FriendsManager()
+
     class Meta:
         managed = False
         db_table = 'friends'
 
-    def get_following_users(self, profile_user):
-        qs = Friends.objects.filter(sender_idx=profile_user).values('receiver_idx')
-        return qs
-    # users = []
-    # qs = Friends.objects.filter(sender_idx=profile_user).values('receiver_idx')
-    # for q in qs:
-    #     users.insert(Users.objects.get(idx=q))  # User.objects.all().exclude(username=self.user.username)
-    #
-    # return users
-
-    def get_followers(self, profile_user):
-        qs = Friends.objects.filter(receiver_idx=profile_user).values('receiver_idx')
-        return qs
-
-    def toggle_follow(self, user, to_toggle_user):
-        friend, created = Friends.objects.get_or_create(sender_idx=user)  # (user_obj, true)
-        # to_toggle_user -> current user가 팔로우 하고 싶은 사람을 받은
-        if to_toggle_user in friend.receiver_idx.all():
-            Friends.objects.delete(receiver_idx=to_toggle_user)
-            added = False
-        else:
-            follow = Friends(sender_idx=user, receiver_idx=to_toggle_user)
-            follow.save()
-            added = True
-        return added
-
-    def is_following(self, user, followed_by_user):
-        friend, created = Friends.objects.get_or_create(sender_idx=user)
-        if created:
-            return False
-        if followed_by_user in friend.receiver_idx.all():
-            return True
-        return False
 
 
 '''
