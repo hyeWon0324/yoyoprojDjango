@@ -9,10 +9,10 @@ from .views import (
     )
 
 urlpatterns = [
-    path('feeds/<int:user_id>/', PostListAPIView.as_view(), name='list'),  # /api/profile/
-    path('mr/<int:user_id>/'),
-    path('song/<int:user_id>/'),
-    path('following/<int:user_id>/'),
-    path('followers/<int:user_id>/'),
-    path('likes/<int:user_id>/'),
+    path('feeds/<string:user_id>/', PostListAPIView.as_view(), name='list'),  # /api/profile/
+    path('mr/<string:user_id>/'),
+    path('song/<string:user_id>/'),
+    path('following/<string:user_id>/'),
+    path('followers/<string:user_id>/'),
+    path('likes/<string:user_id>/'),
 ]

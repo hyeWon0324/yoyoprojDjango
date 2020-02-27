@@ -24,17 +24,16 @@ class UsersDisplaySmallSerializer(serializers.ModelSerializer):
             # 'email',
         ]
 
-
-class Friends(serializers.ModelSerializer):
-    class Meta:
-        model = Users
-        fields = [
-            'idx',
-            'sender_idx',
-            'receiver_idx',
-            'created_dt'
-        ]
-
+#
+# class Friends(serializers.ModelSerializer):
+#     class Meta:
+#         model = Users
+#         fields = [
+#             'idx',
+#             'sender_idx',
+#             'receiver_idx',
+#             'created_dt'
+#         ]
 
 
 class UserProfileDisplaySerializer(serializers.ModelSerializer):
@@ -89,9 +88,25 @@ class UserProfileDisplaySerializer(serializers.ModelSerializer):
             pass
 
     # track post 큰 카드 버젼
-    def get_likes_counts(obj):
+    def get_likes_counts(self, obj):
         try:
             counts = Likes.objects.get_user_likes_count(obj.idx)
             return counts
         except:
             pass
+
+    def get_followers(self, obj):
+        try:
+            counts = Friends.objects.get_user_likes_count(obj.idx)
+            return counts
+        except:
+            pass
+
+    def get_followings(self, obj):
+        try:
+            counts = Likes.objects.get_user_likes_count(obj.idx)
+            return counts
+        except:
+            pass
+
+

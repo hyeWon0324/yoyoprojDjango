@@ -51,10 +51,8 @@ class TrackPostModelSerializer(serializers.ModelSerializer):
 
     def get_did_like(self, obj):
         try:
-            user = self.request.user
-            if user.is_authenticated():
-                if user in obj.liked.all():
-                    return True
+           is_liked = Likes.objects.is_liked(obj.users_idx, obj.idx)
+           return is_liked
         except:
             pass
         return False
@@ -62,7 +60,7 @@ class TrackPostModelSerializer(serializers.ModelSerializer):
     def get_tags(self, obj):
         try:
             hashtag_list = []
-            if (obj.tags):
+            if obj.tags is not None:
                 taglist = obj.tags.split(' ')
 
                 for tag in taglist:
@@ -80,22 +78,25 @@ class TrackPostModelSerializer(serializers.ModelSerializer):
 
 
 
-
 # track post 작은 카드 버젼
 class UsersDisplaySmallSerializer(serializers.ModelSerializer):
+    user_pic = serializers.SerializerMethodField()  # user profile avatar image
+    profile_pic = serializers.SerializerMethodField()  # user profile 배경 이미지
+
     class Meta:
         model = Users
         fields = [
             'idx',
             'user_id',
             'nickname',
-            'profile_pic',
-            'user_pic',
             'follower_count',
             'following_count',
             'tracks_count',
             'grade',
             'status',
+
+            'profile_pic',
+            'background_pic',
             # 'email',
         ]
 
@@ -131,13 +132,10 @@ class UserProfileDisplaySerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
         fields = [
-            'objects',
             'idx',
             'user_id',
             'nickname',
             'email',
-            'profile_pic',
-            'background_pic',
             'follower_count',
             'following_count',
             'tracks_count',
@@ -145,16 +143,25 @@ class UserProfileDisplaySerializer(serializers.ModelSerializer):
             'status',
             'created_dt',
             'refresh_token',
+
             'followers',
             'followings',
+            'profile_pic',
+            'background_pic',
+            'bio',
+            'total_comment_counts',
         ]
 
     def get_profile_pic(self, obj):
         try:
+            if obj is None:
+                obj = ""
+                return obj
             dic = json.loads(obj.profile)
             return dic["profile_pic"]
         except:
             pass
+        return ""
 
     def get_background_pic(self, obj):
         try:
@@ -162,6 +169,15 @@ class UserProfileDisplaySerializer(serializers.ModelSerializer):
             return dic["background_pic"]
         except:
             pass
+        return ""
+
+    def get_bio(self, obj):
+        try:
+            dic = json.loads(obj.profile)
+            return dic["texts"]
+        except:
+            pass
+        return ""
 
     def get_total_comment_counts(self, obj):
         try:
@@ -170,3 +186,24 @@ class UserProfileDisplaySerializer(serializers.ModelSerializer):
 
         except:
             pass
+        return ""
+
+    def get_followers(self,obj):
+        try:
+            users = Friends.objects.get_followers(obj.idx)
+            followers = UsersDisplaySmallSerializer(users).data # users 는 리스트 형태일텐데 괜찮을 것인가
+            return followers
+
+        except:
+            pass
+        return ""
+
+    def get_followings(self, obj):
+        try:
+            users = Friends.objects.get_following_users(obj.idx)
+            followings = UsersDisplaySmallSerializer(users).data
+            return followings
+
+        except:
+            pass
+        return ""

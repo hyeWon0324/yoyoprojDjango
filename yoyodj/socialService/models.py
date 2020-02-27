@@ -185,6 +185,28 @@ class LikesManager(models.Manager):
         except:
             pass
 
+    def is_liked(self, user, post):
+        try:
+            qs = Likes.objects.get(users_idx=user, posts_idx=post)
+            if qs is not None:
+                return True
+            else:
+                return False
+        except:
+            pass
+
+        return False
+
+    def like_toggle(self, user, post):
+        post = Posts.objects.get(idx=post)
+
+        if self.is_liked(user,post):
+            post.likes_count += 1
+        else:
+            post.likes_count -= 1
+
+
+
 class Likes(models.Model):
     idx = models.AutoField(primary_key=True)
     users_idx = models.ForeignKey('Users', models.DO_NOTHING, db_column='users_idx', related_name='fk_likes_1')
@@ -322,7 +344,7 @@ class FriendsManager(models.Manager):
     # return users
 
     def get_followers(self, profile_user):
-        qs = Friends.objects.filter(receiver_idx=profile_user).values('receiver_idx')
+        qs = Friends.objects.filter(receiver_idx=profile_user).values('sender_idx')
         return qs
 
     def toggle_follow(self, user, to_toggle_user):

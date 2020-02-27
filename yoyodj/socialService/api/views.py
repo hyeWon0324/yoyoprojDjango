@@ -1,26 +1,108 @@
 from django.db.models import Q
 from rest_framework import generics
-from rest_framework import permissions
+from rest_framework import permissions, reverse
 from rest_framework.reverse import reverse_lazy
 from rest_framework.views import APIView
 import jwt
 from rest_framework.response import Response
 
 from ..models import Posts, Friends, Users, Comments, Likes
-from .serializers import TrackPostModelSerializer
+from .serializers import TrackPostModelSerializer, UserProfileDisplaySerializer
 
+# api/post/:post_id/like/
+# api/post/:post_id/unlike/
 
 class LikeToggleAPIView(APIView):
-    pass
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, user_id, format=None):
+        user = Users.objects.get(user_id=user_id)
+        post_qs = Posts.objects.filter(users_idx=user.idx)
+        message = "Auth error "
+
+        access_token = self.request.data.get("access_token")
+
+        if access_token is not None:
+            payload = jwt.decode(access_token, 'HS256')
+            user_idx = payload['idx']  # user_id, idx, email
+            user = Users.objects.get(user_idx=user_idx)
+            #self.request.user = user
+            is_liked = Posts.objects.like_toggle(user, post_qs.first())
+            return Response({'liked': is_liked})
+        return Response({"message": message}, status=203)
+
+
+# api / profile / feeds / < str: users_id >
+
+class UserProfileAPIView(APIView):
+    serializer_class = UserProfileDisplaySerializer
+
+    def get(self, request, user_id):
+        access_token = self.request.data.get("access_token")
+
+        if access_token is not None:
+            payload = jwt.decode(access_token, 'HS256')
+            user_idx = payload['idx']  # user_id, idx, email
+            user = Users.objects.get(user_idx=user_idx)
+            #self.request.user = user
+
+
+# api / follow /: my_id /:user_id
+#
+# api/unfollow/:my_id/:user_id
+#
+class FollowToggleAPIView(APIView):
+
+    def get(self, request, username, *args, **kwargs):
+        access_token = self.request.data.get("access_token")
+
+        if access_token is not None:
+            payload = jwt.decode(access_token, 'HS256')
+            user_idx = payload['idx']  # user_id, idx, email
+            user = Users.objects.get(user_idx=user_idx)
+
+            is_following = Users.objects.toggle_follow(user, )
+        return reverse("profiles:detail", username=username)
+        # url = reverse("profiles:detail", kwargs={"username": username})
+        # HttpResponseRedirect(url)
+
+
+
+# api/profile/mr/<str:users_id>
+
+
+# api/profile/song/<str:users_id>
+
+
+# api/profile/following/<str: sender_id>
+#
+# api/profile/followers/<str:receiver_id>
+#
+# api / profile / likes /: user_id
+#
+# messages/:my_id/:user_id
+#
+# api / post /: user_id /:post_id
+#
+# api/upload/post/
+#
+# post/user_id/post_idx/edit
+#
+# api/post/user_id/post_idx/remove
+#
+# api/post/<string:user_id>/<int:post_id>/comment/
+#
+
+
 
 
 class PostCreateAPIView(generics.CreateAPIView):
-
     serializer_class = TrackPostModelSerializer
+
     # permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        #request body 에 있는 track-idx 받는다
+        # request body 에 있는 track-idx 받는다
         access_token = self.request.data.get("access_token")
 
         if access_token is not None:
@@ -80,4 +162,4 @@ class PostListAPIView(generics.ListAPIView):
 class TweetDeleteView(APIView):
     model = Posts
     template_name = 'posts/delete_confirm.html'
-    success_url = reverse_lazy("post:list") #reverse()
+    success_url = reverse_lazy("post:list")  # reverse()
